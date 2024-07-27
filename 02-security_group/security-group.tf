@@ -36,6 +36,22 @@ module "ansible_security_group" {
 
 }
 
+module "backend-alb_security_group" {
+  source = "../../terraform-securitygroup-resource"
+  sg_name = "alb-${var.sg_name}"
+  expense_vpc_id = data.aws_ssm_parameter.vpc_id_expense.value
+
+}
+
+module "web-alb_security_group" {
+  source = "../../terraform-securitygroup-resource"
+  sg_name = "web-alb-${var.sg_name}"
+  expense_vpc_id = data.aws_ssm_parameter.vpc_id_expense.value
+
+}
+
+
+
 
 
 resource "aws_security_group_rule" "backend-db" {
@@ -58,15 +74,34 @@ resource "aws_security_group_rule" "bastion-db" {
 
 
 
+resource "aws_security_group_rule" "frontend-backend_alb" {
+  type              = "ingress"
+  from_port         = 80 #destination port
+  to_port           = 80
+  protocol          = "tcp"
+  security_group_id = module.backend-alb_security_group.securitygroup_id
+  source_security_group_id = module.frontend_security_group.securitygroup_id
+}
 
-resource "aws_security_group_rule" "frontend-backend" {
+resource "aws_security_group_rule" "alb-backend" {
   type              = "ingress"
   from_port         = 8080 #destination port
   to_port           = 8080
   protocol          = "tcp"
   security_group_id = module.backend_security_group.securitygroup_id
-  source_security_group_id = module.frontend_security_group.securitygroup_id
+  source_security_group_id = module.backend-alb_security_group.securitygroup_id
 }
+
+
+resource "aws_security_group_rule" "bastion-alb_http" {
+  type              = "ingress"
+  from_port         = 80 #destination port
+  to_port           = 80
+  protocol          = "tcp"
+  security_group_id = module.backend-alb_security_group.securitygroup_id
+  source_security_group_id = module.bastion_security_group.securitygroup_id
+}
+
 
 resource "aws_security_group_rule" "bastion-backend" {
   type              = "ingress"
@@ -87,15 +122,24 @@ resource "aws_security_group_rule" "ansible-backend" {
 }
 
 
-resource "aws_security_group_rule" "public-frontend" {
+
+resource "aws_security_group_rule" "public-web_alb" {
+  type              = "ingress"
+  from_port         = 80 #destination port
+  to_port           = 80
+  protocol          = "tcp"
+  security_group_id = module.web-alb_security_group.securitygroup_id
+  cidr_blocks = ["0.0.0.0/0"]
+}
+
+resource "aws_security_group_rule" "web_alb-frontend" {
   type              = "ingress"
   from_port         = 80 #destination port
   to_port           = 80
   protocol          = "tcp"
   security_group_id = module.frontend_security_group.securitygroup_id
-  cidr_blocks = ["0.0.0.0/0"]
+ source_security_group_id = module.web-alb_security_group.securitygroup_id
 }
-
 
 resource "aws_security_group_rule" "ansible-frontend" {
   type              = "ingress"
@@ -126,6 +170,7 @@ resource "aws_security_group_rule" "public-ansible" {
 }
 
 
+
 resource "aws_security_group_rule" "public-bastion" {
   type              = "ingress"
   from_port         = 22 #destination port
@@ -134,6 +179,8 @@ resource "aws_security_group_rule" "public-bastion" {
   security_group_id = module.bastion_security_group.securitygroup_id
   cidr_blocks = ["0.0.0.0/0"]
 }
+
+
 
 
 

@@ -23,6 +23,14 @@ variable "database_subnet"{
     default = "database-expense"
 }
 
+variable "frontend_subnet_group_name"{
+    default = "expense-datbase-group"
+    
+}
+
+
+
+
 
 
 

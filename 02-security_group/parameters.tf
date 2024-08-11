@@ -42,3 +42,25 @@ resource "aws_ssm_parameter" "web_alb-sg-id" {
   value = module.web-alb_security_group.securitygroup_id
 }
 
+
+
+resource "aws_ssm_parameter" "jenkinsserver-sg-id" {
+  name  = "/expense/jenkinsserver-sg-id"
+  type  = "String"
+  value = module.jenkinsserver-security_group.securitygroup_id
+}
+
+resource "aws_ssm_parameter" "jenkinsslave-sg-id" {
+  name  = "/expense/jenkinsslave-sg-id"
+  type  = "String"
+  value = module.jenkinsslave-security_group.securitygroup_id
+}
+
+resource "aws_ssm_parameter" "nexus-sg-id" {
+  name  = "/expense/nexusserver-sg-id"
+  type  = "String"
+  value = module.nexus-security_group.securitygroup_id
+}
+
+
+

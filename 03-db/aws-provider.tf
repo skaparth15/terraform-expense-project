@@ -7,7 +7,7 @@ terraform {
   }
 
    backend "s3" {
-    bucket = "ilovedevops"
+    bucket = "ilovedevops1"
     key    = "terraform-db-instances-project"
     region = "us-east-1"
   }

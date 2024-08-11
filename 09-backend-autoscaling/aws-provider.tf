@@ -7,7 +7,7 @@ terraform {
   }
 
    backend "s3" {
-    bucket = "ilovedevops"
+    bucket = "ilovedevops1"
     key    = "terraform-backend-autoscaling-alb"
     region = "us-east-1"
   }

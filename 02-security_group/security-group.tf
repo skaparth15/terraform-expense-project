@@ -50,7 +50,27 @@ module "web-alb_security_group" {
 
 }
 
+module "jenkinsserver-security_group" {
+  source = "../../terraform-securitygroup-resource"
+  sg_name = "jenkinsserver-${var.sg_name}"
+  expense_vpc_id = data.aws_ssm_parameter.vpc_id_expense.value
 
+}
+
+
+module "jenkinsslave-security_group" {
+  source = "../../terraform-securitygroup-resource"
+  sg_name = "jenkinsslave-${var.sg_name}"
+  expense_vpc_id = data.aws_ssm_parameter.vpc_id_expense.value
+
+}
+
+module "nexus-security_group" {
+  source = "../../terraform-securitygroup-resource"
+  sg_name = "nexus-${var.sg_name}"
+  expense_vpc_id = data.aws_ssm_parameter.vpc_id_expense.value
+
+}
 
 
 
@@ -171,6 +191,9 @@ resource "aws_security_group_rule" "public-ansible" {
 
 
 
+
+
+
 resource "aws_security_group_rule" "public-bastion" {
   type              = "ingress"
   from_port         = 22 #destination port
@@ -180,8 +203,62 @@ resource "aws_security_group_rule" "public-bastion" {
   cidr_blocks = ["0.0.0.0/0"]
 }
 
+resource "aws_security_group_rule" "public-jenkins_server" {
+  type              = "ingress"
+  from_port         = 22 #destination port
+  to_port           = 22
+  protocol          = "tcp"
+  security_group_id = module.jenkinsserver-security_group.securitygroup_id
+  cidr_blocks = ["0.0.0.0/0"]
+}
 
 
+resource "aws_security_group_rule" "public-jenkins_server_web" {
+  type              = "ingress"
+  from_port         = 8080 #destination port
+  to_port           = 8080
+  protocol          = "tcp"
+  security_group_id = module.jenkinsserver-security_group.securitygroup_id
+  cidr_blocks = ["0.0.0.0/0"]
+}
+
+resource "aws_security_group_rule" "jenkins_server-jenkins_slave" {
+  type              = "ingress"
+  from_port         = 22 #destination port
+  to_port           = 22
+  protocol          = "tcp"
+  security_group_id = module.jenkinsslave-security_group.securitygroup_id
+   source_security_group_id = module.jenkinsserver-security_group.securitygroup_id
+}
+
+resource "aws_security_group_rule" "public-jenkins_slave" {
+  type              = "ingress"
+  from_port         = 22 #destination port
+  to_port           = 22
+  protocol          = "tcp"
+  security_group_id = module.jenkinsslave-security_group.securitygroup_id
+  cidr_blocks = ["0.0.0.0/0"]
+}
+
+resource "aws_security_group_rule" "public-nexus_server" {
+  type              = "ingress"
+  from_port         = 8081 #destination port
+  to_port           = 8081
+  protocol          = "tcp"
+  security_group_id = module.nexus-security_group.securitygroup_id
+  cidr_blocks = ["0.0.0.0/0"]
+}
+
+
+
+resource "aws_security_group_rule" "public-nexus_server_ssh" {
+  type              = "ingress"
+  from_port         = 22 #destination port
+  to_port           = 22
+  protocol          = "tcp"
+  security_group_id = module.nexus-security_group.securitygroup_id
+  cidr_blocks = ["0.0.0.0/0"]
+}
 
 
 

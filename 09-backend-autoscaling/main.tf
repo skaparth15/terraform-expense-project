@@ -35,7 +35,7 @@ resource "aws_launch_template" "backend" {
   
   image_id = aws_ami_from_instance.backend_ami.id
 
-  instance_initiated_shutdown_behavior = "terminate"
+  # instance_initiated_shutdown_behavior = "terminate"
 
    update_default_version = true
 
@@ -54,7 +54,7 @@ resource "aws_launch_template" "backend" {
 
 resource "aws_autoscaling_group" "backend" {
   name                      =  "${var.project_name}-backend"
-  max_size                  = 5
+  max_size                  = 1
   min_size                  = 1
   health_check_grace_period = 60
   health_check_type         = "ELB"
@@ -89,7 +89,7 @@ resource "aws_autoscaling_policy" "backend-policy" {
     predefined_metric_type = "ASGAverageCPUUtilization"
   }
 
-  target_value = 10.0
+  target_value = 30.0
 }
 
 }

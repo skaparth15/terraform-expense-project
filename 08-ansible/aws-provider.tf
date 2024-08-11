@@ -7,7 +7,7 @@ terraform {
   }
 
    backend "s3" {
-    bucket = "ilovedevops"
+    bucket = "ilovedevops1"
     key    = "terraform-ansibleexpense-project"
     region = "us-east-1"
   }
